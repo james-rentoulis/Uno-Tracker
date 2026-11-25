@@ -92,12 +92,10 @@ details label{display:block;font-size:14px;color:var(--muted);margin:12px 0 4px}
 
 <h2>Sync</h2>
 <details class="card" id="cfg"><summary>Sync settings</summary>
-<label for="gh-repo">GitHub repo (owner/name)</label><input id="gh-repo" placeholder="you/uno-ledger" autocomplete="off">
-<label for="gh-branch">Branch</label><input id="gh-branch" placeholder="main" autocomplete="off">
-<label for="gh-path">Data file</label><input id="gh-path" placeholder="data.json" autocomplete="off">
-<label for="gh-token">Access token (needed to record games)</label><input id="gh-token" type="password" autocomplete="off">
-<p class="hint" style="margin-top:12px">Anyone can view the scores. Only people with a token can change them. The token stays in this browser.</p>
-<button id="gh-save">Save and sync</button>
+<label for="sy-url">Backend URL</label><input id="sy-url" placeholder="https://uno-ledger.your-name.workers.dev" autocomplete="off">
+<label for="sy-pin">Scorer PIN (only if your backend has one)</label><input id="sy-pin" type="password" autocomplete="off">
+<p class="hint" style="margin-top:12px">Anyone with the link can view scores. With a PIN set on the backend, only people who know it can record games.</p>
+<button id="sy-save">Save and sync</button>
 </details>
 
 <h2>Reset</h2>
@@ -189,34 +187,29 @@ function render(){
   }).join(""):'<p class="empty">No games yet. Record one above.</p>';
 }
 
-// ---- Shared storage: the scores live in a JSON file in a GitHub repo ----
-var DEFAULTS={repo:"",branch:"main",path:"data.json"};
-var cfg={repo:DEFAULTS.repo,branch:DEFAULTS.branch,path:DEFAULTS.path,token:""};
-try{var cs=JSON.parse(localStorage.getItem("uno-gh-cfg")||"null");if(cs)Object.keys(cs).forEach(function(k){if(cs[k])cfg[k]=cs[k];});}catch(e){}
+// ---- Shared storage: a small backend (worker.js) keeps one copy of the scores ----
+var DEFAULTS={url:"https://uno-backend.james-rentoulis1.workers.dev/"};
+var cfg={url:DEFAULTS.url,pin:""};
+try{var cs=JSON.parse(localStorage.getItem("uno-sync-cfg")||"null");if(cs)Object.keys(cs).forEach(function(k){if(cs[k])cfg[k]=cs[k];});}catch(e){}
 var pending=[],flushing=false,timer=null;
 function setSync(t){var el=document.getElementById("sync");if(el)el.textContent=t;}
-function fileUrl(){return "https://api.github.com/repos/"+cfg.repo+"/contents/"+cfg.path+"?ref="+encodeURIComponent(cfg.branch);}
-function hdr(){var h={"Accept":"application/vnd.github+json"};if(cfg.token)h["Authorization"]="Bearer "+cfg.token;return h;}
-function clean(st){if(!st||!Array.isArray(st.players))st=st||{};st.players=st.players||[];st.games=st.games||[];return st;}
-async function ghGet(){
-  var r=await fetch(fileUrl(),{headers:hdr(),cache:"no-cache"});
-  if(r.status===404)return{state:clean({}),sha:null};
+function api(){return cfg.url.replace(/\/+$/,"");}
+function clean(st){st=st||{};st.players=Array.isArray(st.players)?st.players:[];st.games=Array.isArray(st.games)?st.games:[];return st;}
+async function remoteGet(){
+  var r=await fetch(api()+"/state",{cache:"no-store"});
   if(!r.ok)throw new Error("HTTP "+r.status);
   var j=await r.json();
-  return{state:clean(JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))))),sha:j.sha};
+  return{state:clean(j.state),version:j.version};
 }
-async function ghPut(st,sha){
-  var body={message:"Update scores",branch:cfg.branch,content:btoa(unescape(encodeURIComponent(JSON.stringify(st,null,1))))};
-  if(sha)body.sha=sha;
-  var h=hdr();h["Content-Type"]="application/json";
-  var r=await fetch("https://api.github.com/repos/"+cfg.repo+"/contents/"+cfg.path,{method:"PUT",headers:h,body:JSON.stringify(body)});
+async function remotePut(st,version){
+  var h={"Content-Type":"application/json"};if(cfg.pin)h["X-Pin"]=cfg.pin;
+  var r=await fetch(api()+"/state",{method:"PUT",headers:h,body:JSON.stringify({version:version,state:st})});
   return{ok:r.ok,status:r.status};
 }
-// Every change is applied to the latest copy from GitHub, so two scorers don't overwrite each other.
+// Every change is re-applied to the latest shared copy, so two scorers don't overwrite each other.
 function commit(fn){
-  if(cfg.repo&&!cfg.token){setSync("Read-only. Add an access token in Sync settings to record changes.");return;}
   fn(state);save();render();
-  if(!cfg.repo)return;
+  if(!cfg.url)return;
   pending.push(fn);flush();
 }
 async function flush(){
@@ -225,46 +218,43 @@ async function flush(){
     while(pending.length){
       var fns=pending.slice(),ok=false;
       for(var a=0;a<4&&!ok;a++){
-        var r=await ghGet();fns.forEach(function(f){f(r.state);});
-        var res=await ghPut(r.state,r.sha);
+        var r=await remoteGet();fns.forEach(function(f){f(r.state);});
+        var res=await remotePut(r.state,r.version);
         if(res.ok){ok=true;state=r.state;pending.splice(0,fns.length);}
-        else if(res.status!==409&&res.status!==422)throw new Error("HTTP "+res.status+(res.status===401||res.status===403||res.status===404?", check the token and repo":""));
+        else if(res.status===401){pending.length=0;flushing=false;setSync("Not saved: enter the scorer PIN in Sync settings.");return;}
+        else if(res.status!==409)throw new Error("HTTP "+res.status);
       }
       if(!ok)throw new Error("too many conflicts");
     }
-    save();render();setSync("Saved to GitHub");
+    save();render();setSync("Saved");
   }catch(e){setSync("Couldn’t save ("+e.message+"). Changes are kept here and will retry.");}
   flushing=false;
 }
 async function poll(){
-  if(!cfg.repo||flushing)return;
+  if(!cfg.url||flushing)return;
   if(pending.length){flush();return;}
   try{
-    var r=await ghGet();state=r.state;save();render();
-    setSync("Up to date at "+new Date().toLocaleTimeString([],{timeStyle:"short"})+(cfg.token?"":" · read-only"));
-  }catch(e){setSync("Can’t reach GitHub ("+e.message+")");}
+    var r=await remoteGet();state=r.state;save();render();
+    setSync("Up to date at "+new Date().toLocaleTimeString([],{timeStyle:"short"}));
+  }catch(e){setSync("Can’t reach the backend ("+e.message+")");}
 }
 async function connect(){
-  if(!cfg.repo){setSync("Local only. Open Sync settings to share scores through GitHub.");return;}
+  if(!cfg.url){setSync("Local only. Open Sync settings to share scores.");return;}
   try{
-    var r=await ghGet();
-    if(r.sha===null&&cfg.token&&(state.players.length||state.games.length)){
+    var r=await remoteGet();
+    if(r.version===0&&(state.players.length||state.games.length)){
       var snap=JSON.parse(JSON.stringify(state));
       commit(function(st){if(!st.players.length&&!st.games.length){st.players=snap.players;st.games=snap.games;}});
-    }else{state=r.state;save();render();setSync(cfg.token?"Connected":"Connected · read-only");}
-  }catch(e){setSync("Can’t reach GitHub ("+e.message+")");}
-  if(!timer)timer=setInterval(poll,30000);
+    }else{state=r.state;save();render();setSync("Connected");}
+  }catch(e){setSync("Can’t reach the backend ("+e.message+")");}
+  if(!timer)timer=setInterval(poll,15000);
 }
-document.getElementById("gh-repo").value=cfg.repo;
-document.getElementById("gh-branch").value=cfg.branch;
-document.getElementById("gh-path").value=cfg.path;
-document.getElementById("gh-token").value=cfg.token;
-document.getElementById("gh-save").onclick=function(){
-  cfg.repo=document.getElementById("gh-repo").value.trim();
-  cfg.branch=document.getElementById("gh-branch").value.trim()||"main";
-  cfg.path=document.getElementById("gh-path").value.trim()||"data.json";
-  cfg.token=document.getElementById("gh-token").value.trim();
-  try{localStorage.setItem("uno-gh-cfg",JSON.stringify(cfg));}catch(e){}
+document.getElementById("sy-url").value=cfg.url;
+document.getElementById("sy-pin").value=cfg.pin;
+document.getElementById("sy-save").onclick=function(){
+  cfg.url=document.getElementById("sy-url").value.trim();
+  cfg.pin=document.getElementById("sy-pin").value.trim();
+  try{localStorage.setItem("uno-sync-cfg",JSON.stringify(cfg));}catch(e){}
   connect();
 };
 document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
