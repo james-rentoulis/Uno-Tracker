@@ -6,106 +6,134 @@
 <title>Uno Ledger</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;1,900&display=swap">
 <style>
-:root{--bg:#eef1f6;--surface:#fff;--ink:#14213d;--muted:#5d6b86;--line:#d5dbe7;--red:#e4312b;--yellow:#f7c600;--green:#2d9d4b;--blue:#1f5fbf;
+:root{--bg:#f1faee;--surface:#fff;--ink:#1d3557;--muted:#457b9d;--line:#a8dadc;--red:#e63946;--yellow:#a8dadc;--green:#457b9d;--blue:#457b9d;--grad:linear-gradient(135deg,#457b9d,#1d3557);--shadow:0 1px 2px rgba(29,53,87,.06),0 10px 28px rgba(29,53,87,.08);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101626;--surface:#1a2238;--ink:#eef1f8;--muted:#9aa7c4;--line:#2d3757;--red:#ff5a52;--yellow:#ffd426;--green:#4cc36d;--blue:#5b94f0}}
-:root[data-theme="dark"]{--bg:#101626;--surface:#1a2238;--ink:#eef1f8;--muted:#9aa7c4;--line:#2d3757;--red:#ff5a52;--yellow:#ffd426;--green:#4cc36d;--blue:#5b94f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10203a;--surface:#1d3557;--ink:#f1faee;--muted:#a8dadc;--line:#34567a;--red:#ff7a85;--yellow:#a8dadc;--green:#a8dadc;--blue:#a8dadc;--grad:linear-gradient(135deg,#457b9d,#2f5f80);--shadow:none}}
+:root[data-theme="dark"]{--bg:#10203a;--surface:#1d3557;--ink:#f1faee;--muted:#a8dadc;--line:#34567a;--red:#ff7a85;--yellow:#a8dadc;--green:#a8dadc;--blue:#a8dadc;--grad:linear-gradient(135deg,#457b9d,#2f5f80);--shadow:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Archivo,system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
-h1{font:italic 900 clamp(40px,12vw,64px)/.95 Archivo,system-ui,sans-serif;letter-spacing:-.02em;margin:8px 0 4px;display:flex;gap:.08em;flex-wrap:wrap}
-h1 span:nth-child(1){color:var(--red)}h1 span:nth-child(2){color:var(--yellow)}h1 span:nth-child(3){color:var(--green)}h1 span:nth-child(4){color:var(--blue)}
-.sub{color:var(--muted);margin:0 0 24px}
-h2{font-size:18px;margin:32px 0 10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
+.appbar h1{font:italic 900 30px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;margin:0;display:flex;color:var(--ink)}
+.appbar h1 span:last-child{color:var(--red)}
+ 
+.appbar p{margin:0;font-size:12px;color:var(--muted);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main{max-width:640px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+h2{font-size:20px;margin:6px 2px 12px}
+h2:not(:first-child){margin-top:28px}
+.card,.list{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.card{padding:16px;margin-bottom:16px}
+.list{overflow:hidden}
 .row{display:flex;gap:8px;flex-wrap:wrap}
-input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff}
+label{display:block;font-size:14px;color:var(--muted);margin:14px 0 6px}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 14px;min-width:0}
+input{flex:1;width:100%}
+.row input{width:auto}
+button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--grad);color:#fff}
 button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
-button.sm{padding:2px 8px;font-size:13px}
+button.sm{padding:3px 10px;font-size:13px;border-radius:9px}
 button:disabled{opacity:.4;cursor:not-allowed}
-:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
-.seg button{border-radius:0;background:transparent;color:var(--muted);padding:8px 18px}
-.seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;background:transparent;color:var(--muted);padding:8px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(29,53,87,.18)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.chip{display:flex;align-items:center;gap:8px;background:var(--bg);color:var(--ink);border:2px solid var(--line);padding:6px 12px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--bg);color:var(--ink);border:2px solid transparent;border-radius:999px;padding:5px 14px 5px 5px}
 .chip.on{border-color:var(--blue);background:var(--surface)}
 .chip.taken{opacity:.45}
-.team{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.chip .av{width:26px;height:26px;font-size:12px}
+.team{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
 .team .hd{display:flex;align-items:center;gap:8px}
 .team .hd b{flex:1}
 .team .chips{margin-bottom:0}
-.place{min-width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;background:var(--blue);color:#fff;font-weight:600}
-.place.p1{background:var(--yellow);color:#14213d}
+.place{min-width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;background:var(--grad);color:#fff;font-weight:600}
+.place.p1{background:var(--yellow);color:#1d3557}
 .hint{color:var(--muted);font-size:14px;margin:0 0 12px}
-table{width:100%;border-collapse:collapse}
-th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line)}
-th{font-weight:600;color:var(--muted);font-size:14px}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
-tr:last-child td{border-bottom:0}
-.elo{font-weight:900;font-size:18px}
+.av{width:42px;height:42px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.c0{background:#e63946}.c1{background:#457b9d}.c2{background:linear-gradient(135deg,#1d3557,#457b9d)}.c3{background:#a8dadc;color:#1d3557}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.lrow:last-child{border-bottom:0}
+.rk{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted);flex:none}
+.rk.r1{background:var(--yellow);color:#1d3557}
+.who{flex:1;min-width:0}
+.who b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who small{color:var(--muted);font-size:13px}
+.elo{font:italic 900 24px Archivo,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 .up{color:var(--green)}.down{color:var(--red)}
-.wrap{overflow-x:auto}
-.game{padding:12px 0;border-bottom:1px solid var(--line)}
-.game:last-child{border-bottom:0}
-.game .top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px;margin-bottom:4px}
-.game .t{margin:2px 0}
-.tag{border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:6px;font-size:12px}
-.empty{color:var(--muted);text-align:center;padding:18px 0;margin:0}
-details.card summary{cursor:pointer;font-weight:600}
-details label{display:block;font-size:14px;color:var(--muted);margin:12px 0 4px}
 .rt{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
-select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;max-width:100%}
+.game{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.game .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--muted);font-size:14px}
+.game .top .when{flex:1}
+.game .t{margin:4px 0}
+.tag{background:var(--bg);border-radius:999px;padding:1px 10px;font-size:12px;font-weight:600;color:var(--ink)}
+.empty{color:var(--muted);text-align:center;padding:22px 0;margin:0}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:0 max(0px,calc((100% - 640px)/2)) env(safe-area-inset-bottom,0px)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;color:var(--muted);border-radius:0;padding:10px 0 8px;font-size:11px}
+.tabbar button{position:relative}
+.tabbar button[aria-current="page"]{color:var(--ink)}
+.tabbar button[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--red)}
 </style>
 </head>
 <body>
+<header class="appbar">
+  <h1><span>U</span><span>n</span><span>o</span><span>!</span></h1>
+  <p id="sync" role="status"></p>
+</header>
 <main>
-<h1><span>U</span><span>n</span><span>o</span><span>!</span></h1>
-<p class="sub">Solo and team games, tracked with Elo.</p>
-<p class="hint" id="sync" role="status"></p>
-
-<h2>Players</h2>
-<div class="card">
-  <div class="row">
-    <input id="name" placeholder="Player name" maxlength="20" autocomplete="off">
-    <button id="add">Add player</button>
+<section id="tab-ranks">
+  <h2>Leaderboard</h2>
+  <div class="list" id="board"></div>
+</section>
+ 
+<section id="tab-play" hidden>
+  <h2>Record a game</h2>
+  <div class="card">
+    <div class="seg" id="mode"><button data-mode="solo">Solo</button><button data-mode="team">Teams</button></div>
+    <p class="hint" id="hint"></p>
+    <div id="entry"></div>
+    <div class="row">
+      <button id="addteam" class="ghost">Add team</button>
+      <button id="record" disabled>Record game</button>
+      <button class="ghost" id="clear">Clear</button>
+    </div>
   </div>
-</div>
-
-<h2>Record a game</h2>
-<div class="card">
-  <div class="seg" id="mode"><button data-mode="solo">Solo</button><button data-mode="team">Teams</button></div>
-  <p class="hint" id="hint"></p>
-  <div id="entry"></div>
-  <div class="row">
-    <button id="addteam" class="ghost">Add team</button>
-    <button id="record" disabled>Record game</button>
-    <button class="ghost" id="clear">Clear</button>
+  <h2>Add a player</h2>
+  <div class="card">
+    <div class="row">
+      <input id="name" placeholder="Player name" maxlength="20" autocomplete="off">
+      <button id="add">Add</button>
+    </div>
   </div>
-</div>
-
-<h2>Leaderboard</h2>
-<div class="card wrap" id="board"></div>
-
-<h2>Game history</h2>
-<div class="row" style="margin-bottom:10px;align-items:center"><label for="hfilter" style="color:var(--muted);font-size:14px">Show games for</label><select id="hfilter"></select></div>
-<p class="hint" id="hsum"></p>
-<div class="card" id="history"></div>
-
-<h2>Sync</h2>
-<details class="card" id="cfg"><summary>Sync settings</summary>
-<label for="sy-url">Backend URL</label><input id="sy-url" placeholder="https://uno-ledger.your-name.workers.dev" autocomplete="off">
-<label for="sy-pin">Scorer PIN (only if your backend has one)</label><input id="sy-pin" type="password" autocomplete="off">
-<p class="hint" style="margin-top:12px">Anyone with the link can view scores. With a PIN set on the backend, only people who know it can record games.</p>
-<button id="sy-save">Save and sync</button>
-</details>
-
-<h2>Reset</h2>
-<button class="ghost" id="reset">Delete all data</button>
+</section>
+ 
+<section id="tab-history" hidden>
+  <h2>Game history</h2>
+  <div class="row" style="margin-bottom:10px;align-items:center"><label for="hfilter" style="margin:0">Show games for</label><select id="hfilter"></select></div>
+  <p class="hint" id="hsum"></p>
+  <div id="history"></div>
+</section>
+ 
+<section id="tab-more" hidden>
+  <h2>Players</h2>
+  <div class="list" id="plist"></div>
+  <h2>Sync</h2>
+  <div class="card">
+    <label for="sy-url" style="margin-top:0">Backend URL</label><input id="sy-url" placeholder="https://uno-ledger.your-name.workers.dev" autocomplete="off">
+    <label for="sy-pin">Scorer PIN (only if your backend has one)</label><input id="sy-pin" type="password" autocomplete="off">
+    <p class="hint" style="margin-top:12px">Anyone with the link can view scores. With a PIN set on the backend, only people who know it can record games.</p>
+    <button id="sy-save">Save and sync</button>
+  </div>
+  <h2>Reset</h2>
+  <button class="ghost" id="reset">Delete all data</button>
+</section>
 </main>
-
+<nav class="tabbar" id="tabbar" aria-label="Sections">
+  <button data-tab="ranks"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Ranks</button>
+  <button data-tab="play"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>Play</button>
+  <button data-tab="history"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>History</button>
+  <button data-tab="more"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>More</button>
+</nav>
 <script>
 (function(){
 var KEY="uno-ledger-v1", START=1000, K=32, MODES=["solo","team"];
@@ -121,11 +149,12 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 var armed=null,hf="";
 function arm(key){if(armed===key){armed=null;return true;}armed=key;render();setTimeout(function(){if(armed===key){armed=null;render();}},4000);return false;}
 function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function av(n){var h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return '<span class="av c'+(h%4)+'">'+esc((n.trim()[0]||"?").toUpperCase())+'</span>';}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function name(id){var p=state.players.find(function(x){return x.id===id});return p?p.name:"Removed player";}
 function names(ids){return ids.map(function(id){return esc(name(id));}).join(" + ");}
 function without(arr,id){return arr.filter(function(x){return x!==id;});}
-
+ 
 // One Elo per player, shared by solo and team games. A team's rating is the average of its members; every pair
 // of teams is a head-to-head scaled by K/(teams-1), and each member gets the full change.
 // Solo games are the same thing with teams of one.
@@ -146,7 +175,7 @@ function compute(){
   });
   return{R:R,S:S,deltas:deltas};
 }
-
+ 
 function render(){
   var c=compute();
   Array.prototype.forEach.call(document.querySelectorAll("#mode button"),function(b){b.setAttribute("aria-pressed",b.dataset.mode===mode);});
@@ -157,9 +186,9 @@ function render(){
   var en=document.getElementById("entry"),ready;
   if(!state.players.length){en.innerHTML='<p class="empty">Add at least two players to start.</p>';ready=false;}
   else if(mode==="solo"){
-    en.innerHTML='<p class="hint">Winner</p><div class="chips">'+state.players.map(function(p){var w=sw===p.id;return '<button class="chip'+(w?' on':'')+'" data-sw="'+p.id+'" aria-pressed="'+w+'">'+esc(p.name)+'</button>';}).join("")+'</div><p class="hint">Lost to them</p><div class="chips">'+state.players.map(function(p){
+    en.innerHTML='<p class="hint">Winner</p><div class="chips">'+state.players.map(function(p){var w=sw===p.id;return '<button class="chip'+(w?' on':'')+'" data-sw="'+p.id+'" aria-pressed="'+w+'">'+av(p.name)+esc(p.name)+'</button>';}).join("")+'</div><p class="hint">Lost to them</p><div class="chips">'+state.players.map(function(p){
       var i=solo.indexOf(p.id);
-      return '<button class="chip'+(i>=0?' on':'')+(sw===p.id?' taken':'')+'" data-spick="'+p.id+'" aria-pressed="'+(i>=0)+'">'+esc(p.name)+'</button>';
+      return '<button class="chip'+(i>=0?' on':'')+(sw===p.id?' taken':'')+'" data-spick="'+p.id+'" aria-pressed="'+(i>=0)+'">'+av(p.name)+esc(p.name)+'</button>';
     }).join("")+'</div>';
     ready=!!sw&&solo.length>=1;
   } else {
@@ -169,19 +198,22 @@ function render(){
         '<button class="ghost sm" data-rmteam="'+ti+'"'+(draft.length<=2?' disabled':'')+'>Remove</button></div>'+
         '<div class="chips">'+state.players.map(function(p){
           var on=t.indexOf(p.id)>=0,el=!on&&draft.some(function(x){return x.indexOf(p.id)>=0;});
-          return '<button class="chip'+(on?' on':'')+(el?' taken':'')+'" data-pick="'+ti+':'+p.id+'" aria-pressed="'+on+'">'+esc(p.name)+'</button>';
+          return '<button class="chip'+(on?' on':'')+(el?' taken':'')+'" data-pick="'+ti+':'+p.id+'" aria-pressed="'+on+'">'+av(p.name)+esc(p.name)+'</button>';
         }).join("")+'</div></div>';
     }).join("");
     ready=draft.filter(function(t){return t.length;}).length>=2;
   }
   document.getElementById("record").disabled=!ready;
-
+ 
   var R=c.R[bmode],S=c.S[bmode],rows=state.players.slice().sort(function(a,b){return R[b.id]-R[a.id];});
-  document.getElementById("board").innerHTML=rows.length?'<table><thead><tr><th>Player</th><th class="n">Elo</th><th class="n">Wins</th><th class="n">Games</th><th></th></tr></thead><tbody>'+rows.map(function(p,i){
+  document.getElementById("board").innerHTML=rows.length?rows.map(function(p,i){
     var s=S[p.id],pct=s.g?Math.round(100*s.w/s.g)+"%":"–";
-    return '<tr><td>'+(i+1)+'. '+esc(p.name)+'</td><td class="n elo">'+Math.round(R[p.id])+'</td><td class="n">'+s.w+' ('+pct+')</td><td class="n">'+s.g+'</td><td class="n"><button class="ghost sm" data-rm="'+p.id+'" aria-label="Remove '+esc(p.name)+'">'+(armed==="rm:"+p.id?"Tap to confirm":"Remove")+'</button></td></tr>';
-  }).join("")+'</tbody></table>':'<p class="empty">No players yet. Add the first one above.</p>';
-
+    return '<div class="lrow"><span class="rk'+(i===0?' r1':'')+'">'+(i+1)+'</span>'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b><small>'+s.w+' wins · '+s.g+' games · '+pct+'</small></div><span class="elo">'+Math.round(R[p.id])+'</span></div>';
+  }).join(""):'<p class="empty">No players yet. Add the first one in the Play tab.</p>';
+  document.getElementById("plist").innerHTML=state.players.length?state.players.map(function(p){
+    return '<div class="lrow">'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b></div><button class="ghost sm" data-rm="'+p.id+'" aria-label="Remove '+esc(p.name)+'">'+(armed==="rm:"+p.id?"Tap to confirm":"Remove")+'</button></div>';
+  }).join(""):'<p class="empty">No players yet.</p>';
+ 
   var hsel=document.getElementById("hfilter"),hkey=state.players.map(function(p){return p.id+p.name;}).join("|");
   if(hf&&!state.players.some(function(p){return p.id===hf;}))hf="";
   if(hsel.dataset.k!==hkey){hsel.dataset.k=hkey;hsel.innerHTML='<option value="">All players</option>'+state.players.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join("");}
@@ -194,10 +226,10 @@ function render(){
       var e=o.d[i],tag="",who=names(t);if(e){var v=e.d;tag=' <span class="'+(v>=0?'up':'down')+'">'+(v>=0?'+':'−')+Math.abs(Math.round(v))+'</span>';who=e.p.map(function(q){return esc(name(q.id))+' <span class="rt">'+Math.round(q.b)+' → '+Math.round(q.a)+'</span>';}).join(" + ");}
       return '<div class="t">'+(o.g.mode==="solo"?(i===0?"Won: ":"Lost: "):(i+1)+". ")+who+tag+'</div>';
     }).join("");
-    return '<div class="game"><div class="top"><span><span class="tag">'+(o.g.mode==="solo"?"Solo":"Teams")+'</span>'+new Date(o.g.t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})+'</span><button class="ghost sm" data-del="'+o.g.id+'">'+(armed==="del:"+o.g.id?"Tap to confirm":"Delete")+'</button></div>'+lines+'</div>';
+    return '<div class="game"><div class="top"><span class="tag">'+(o.g.mode==="solo"?"Solo":"Teams")+'</span><span class="when">'+new Date(o.g.t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})+'</span><button class="ghost sm" data-del="'+o.g.id+'">'+(armed==="del:"+o.g.id?"Tap to confirm":"Delete")+'</button></div>'+lines+'</div>';
   }).join(""):'<p class="empty">'+(state.games.length?"No games for this player yet.":"No games yet. Record one above.")+'</p>';
 }
-
+ 
 // ---- Shared storage: a small backend (worker.js) keeps one copy of the scores ----
 var DEFAULTS={url:""};
 var cfg={url:DEFAULTS.url,pin:""};
@@ -269,7 +301,7 @@ document.getElementById("sy-save").onclick=function(){
   connect();
 };
 document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
-
+ 
 function addPlayer(){
   var el=document.getElementById("name"),n=el.value.trim();
   if(!n)return;
@@ -284,7 +316,7 @@ document.getElementById("clear").onclick=function(){solo=[];sw=null;draft=[[],[]
 document.getElementById("record").onclick=function(){
   var teams=mode==="solo"?(sw?[[sw]].concat(solo.map(function(id){return [id];})):[]):draft.filter(function(t){return t.length;});
   if(teams.length<2)return;
-  var ng={id:uid(),t:Date.now(),mode:mode,teams:teams};commit(function(st){if(!st.games.some(function(x){return x.id===ng.id;}))st.games.push(ng);});bmode=mode;solo=[];sw=null;draft=[[],[]];render();
+  var ng={id:uid(),t:Date.now(),mode:mode,teams:teams};commit(function(st){if(!st.games.some(function(x){return x.id===ng.id;}))st.games.push(ng);});bmode=mode;solo=[];sw=null;draft=[[],[]];render();showTab("ranks");
 };
 document.addEventListener("click",function(e){
   var t=e.target.closest("button");if(!t||t.disabled)return;
@@ -308,8 +340,17 @@ document.getElementById("reset").onclick=function(){
   if(arm("reset")){commit(function(st){st.players=[];st.games=[];});solo=[];sw=null;draft=[[],[]];render();}
 };
 render();
+var tabs=["ranks","play","history","more"];
+function showTab(t){
+  tabs.forEach(function(x){document.getElementById("tab-"+x).hidden=x!==t;});
+  Array.prototype.forEach.call(document.querySelectorAll("#tabbar button"),function(b){b.setAttribute("aria-current",b.dataset.tab===t?"page":"false");});
+  window.scrollTo(0,0);
+}
+document.getElementById("tabbar").onclick=function(e){var b=e.target.closest("button");if(b)showTab(b.dataset.tab);};
+showTab("ranks");
 connect();
 })();
 </script>
 </body>
 </html>
+ 
