@@ -17,7 +17,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
 .appbar h1{font:italic 900 30px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;margin:0;display:flex}
 .appbar h1 span:nth-child(1){color:var(--red)}.appbar h1 span:nth-child(2){color:var(--yellow)}.appbar h1 span:nth-child(3){color:var(--green)}.appbar h1 span:nth-child(4){color:var(--blue)}
-
+ 
 .appbar p{margin:0;font-size:12px;color:var(--muted);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 main{max-width:640px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
 h2{font-size:20px;margin:6px 2px 12px}
@@ -55,6 +55,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .lrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .lrow:last-child{border-bottom:0}
 .rk{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted);flex:none}
+.rk.medal{width:30px;font-size:22px}
 .rk.r1{background:var(--yellow);color:#12182b}
 .who{flex:1;min-width:0}
 .who b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -71,6 +72,13 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:0 max(0px,calc((100% - 640px)/2)) env(safe-area-inset-bottom,0px)}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;color:var(--muted);border-radius:0;padding:10px 0 8px;font-size:11px}
 .tabbar button[aria-current="page"]{color:var(--blue)}
+/* win streaks: 3+ shows a badge, 4+ burns */
+.streak{display:inline-block;margin-right:8px;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.streak.hot{background:linear-gradient(135deg,#e8590c,#c92a2a);color:#fff;border-color:transparent;animation:fire 1s ease-in-out infinite alternate}
+.flame{display:inline-block;transform-origin:50% 90%;animation:flick .45s ease-in-out infinite alternate}
+@keyframes fire{from{box-shadow:0 0 4px 1px rgba(255,170,30,.55),0 0 10px 2px rgba(228,49,43,.3)}to{box-shadow:0 0 9px 3px rgba(255,120,20,.95),0 0 22px 7px rgba(228,49,43,.55)}}
+@keyframes flick{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.2) rotate(5deg)}}
+@media (prefers-reduced-motion:reduce){.streak.hot,.flame{animation:none}}
 </style>
 </head>
 <body>
@@ -83,7 +91,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <h2>Leaderboard</h2>
   <div class="list" id="board"></div>
 </section>
-
+ 
 <section id="tab-play" hidden>
   <h2>Record a game</h2>
   <div class="card">
@@ -104,14 +112,14 @@ button:disabled{opacity:.4;cursor:not-allowed}
     </div>
   </div>
 </section>
-
+ 
 <section id="tab-history" hidden>
   <h2>Game history</h2>
   <div class="row" style="margin-bottom:10px;align-items:center"><label for="hfilter" style="margin:0">Show games for</label><select id="hfilter"></select></div>
   <p class="hint" id="hsum"></p>
   <div id="history"></div>
 </section>
-
+ 
 <section id="tab-more" hidden>
   <h2>Players</h2>
   <div class="list" id="plist"></div>
@@ -152,13 +160,13 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function name(id){var p=state.players.find(function(x){return x.id===id});return p?p.name:"Removed player";}
 function names(ids){return ids.map(function(id){return esc(name(id));}).join(" + ");}
 function without(arr,id){return arr.filter(function(x){return x!==id;});}
-
+ 
 // One Elo per player, shared by solo and team games. A team's rating is the average of its members; every pair
 // of teams is a head-to-head scaled by K/(teams-1), and each member gets the full change.
 // Solo games are the same thing with teams of one.
 function compute(){
   var R={},S={},deltas=[];
-  var r0={},s0={};state.players.forEach(function(p){r0[p.id]=START;s0[p.id]={g:0,w:0};});MODES.forEach(function(m){R[m]=r0;S[m]=s0;});
+  var r0={},s0={};state.players.forEach(function(p){r0[p.id]=START;s0[p.id]={g:0,w:0,k:0};});MODES.forEach(function(m){R[m]=r0;S[m]=s0;});
   state.games.forEach(function(g){
     var r=R[g.mode],st=S[g.mode],ent=[];
     g.teams.forEach(function(t,o){var f=t.filter(function(id){return id in r;});if(f.length)ent.push({o:o,t:f});});
@@ -168,12 +176,12 @@ function compute(){
       d[i]+=ch;d[j]-=ch;
     }
     var out=g.teams.map(function(){return null;});
-    ent.forEach(function(x,i){out[x.o]={d:d[i],p:x.t.map(function(id){var b=r[id];r[id]+=d[i];st[id].g++;if(i===0)st[id].w++;return{id:id,b:b,a:r[id]};})};});
+    ent.forEach(function(x,i){out[x.o]={d:d[i],p:x.t.map(function(id){var b=r[id];r[id]+=d[i];st[id].g++;if(i===0){st[id].w++;st[id].k++;}else st[id].k=0;return{id:id,b:b,a:r[id]};})};});
     deltas.push(out);
   });
   return{R:R,S:S,deltas:deltas};
 }
-
+ 
 function render(){
   var c=compute();
   Array.prototype.forEach.call(document.querySelectorAll("#mode button"),function(b){b.setAttribute("aria-pressed",b.dataset.mode===mode);});
@@ -202,16 +210,16 @@ function render(){
     ready=draft.filter(function(t){return t.length;}).length>=2;
   }
   document.getElementById("record").disabled=!ready;
-
+ 
   var R=c.R[bmode],S=c.S[bmode],rows=state.players.slice().sort(function(a,b){return R[b.id]-R[a.id];});
   document.getElementById("board").innerHTML=rows.length?rows.map(function(p,i){
     var s=S[p.id],pct=s.g?Math.round(100*s.w/s.g)+"%":"–";
-    return '<div class="lrow"><span class="rk'+(i===0?' r1':'')+'">'+(i+1)+'</span>'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b><small>'+s.w+' wins · '+s.g+' games · '+pct+'</small></div><span class="elo">'+Math.round(R[p.id])+'</span></div>';
+    return '<div class="lrow"><span class="rk'+(i<3&&s.g?' medal':'')+'" aria-label="Rank '+(i+1)+'">'+(i<3&&s.g?["🥇","🥈","🥉"][i]:i+1)+'</span>'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b><small>'+(s.k>=3?'<span class="streak'+(s.k>=4?' hot':'')+'">'+(s.k>=4?'<span class="flame">🔥</span> ':'')+s.k+' in a row</span>':'')+s.w+' wins · '+s.g+' games · '+pct+'</small></div><span class="elo">'+Math.round(R[p.id])+'</span></div>';
   }).join(""):'<p class="empty">No players yet. Add the first one in the Play tab.</p>';
   document.getElementById("plist").innerHTML=state.players.length?state.players.map(function(p){
     return '<div class="lrow">'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b></div><button class="ghost sm" data-rm="'+p.id+'" aria-label="Remove '+esc(p.name)+'">'+(armed==="rm:"+p.id?"Tap to confirm":"Remove")+'</button></div>';
   }).join(""):'<p class="empty">No players yet.</p>';
-
+ 
   var hsel=document.getElementById("hfilter"),hkey=state.players.map(function(p){return p.id+p.name;}).join("|");
   if(hf&&!state.players.some(function(p){return p.id===hf;}))hf="";
   if(hsel.dataset.k!==hkey){hsel.dataset.k=hkey;hsel.innerHTML='<option value="">All players</option>'+state.players.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join("");}
@@ -227,7 +235,7 @@ function render(){
     return '<div class="game"><div class="top"><span class="tag">'+(o.g.mode==="solo"?"Solo":"Teams")+'</span><span class="when">'+new Date(o.g.t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})+'</span><button class="ghost sm" data-del="'+o.g.id+'">'+(armed==="del:"+o.g.id?"Tap to confirm":"Delete")+'</button></div>'+lines+'</div>';
   }).join(""):'<p class="empty">'+(state.games.length?"No games for this player yet.":"No games yet. Record one above.")+'</p>';
 }
-
+ 
 // ---- Shared storage: a small backend (worker.js) keeps one copy of the scores ----
 var DEFAULTS={url:""};
 var cfg={url:DEFAULTS.url,pin:""};
@@ -299,7 +307,7 @@ document.getElementById("sy-save").onclick=function(){
   connect();
 };
 document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
-
+ 
 function addPlayer(){
   var el=document.getElementById("name"),n=el.value.trim();
   if(!n)return;
@@ -351,3 +359,4 @@ connect();
 </script>
 </body>
 </html>
+ 
