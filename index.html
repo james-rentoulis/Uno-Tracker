@@ -6,18 +6,18 @@
 <title>Uno Ledger</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;1,900&display=swap">
 <style>
-:root{--bg:#f1faee;--surface:#fff;--ink:#1d3557;--muted:#457b9d;--line:#a8dadc;--red:#e63946;--yellow:#a8dadc;--green:#457b9d;--blue:#457b9d;--grad:linear-gradient(135deg,#457b9d,#1d3557);--shadow:0 1px 2px rgba(29,53,87,.06),0 10px 28px rgba(29,53,87,.08);
+:root{--bg:#f3f4f9;--surface:#fff;--ink:#12182b;--muted:#6b7694;--line:#e4e8f1;--red:#e4312b;--yellow:#f7c600;--green:#2d9d4b;--blue:#1f5fbf;--shadow:0 1px 2px rgba(18,24,43,.06),0 10px 28px rgba(18,24,43,.07);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10203a;--surface:#1d3557;--ink:#f1faee;--muted:#a8dadc;--line:#34567a;--red:#ff7a85;--yellow:#a8dadc;--green:#a8dadc;--blue:#a8dadc;--grad:linear-gradient(135deg,#457b9d,#2f5f80);--shadow:none}}
-:root[data-theme="dark"]{--bg:#10203a;--surface:#1d3557;--ink:#f1faee;--muted:#a8dadc;--line:#34567a;--red:#ff7a85;--yellow:#a8dadc;--green:#a8dadc;--blue:#a8dadc;--grad:linear-gradient(135deg,#457b9d,#2f5f80);--shadow:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c111f;--surface:#161d31;--ink:#eef1f8;--muted:#98a5c4;--line:#27304d;--red:#ff5a52;--yellow:#ffd426;--green:#4cc36d;--blue:#5b94f0;--shadow:none}}
+:root[data-theme="dark"]{--bg:#0c111f;--surface:#161d31;--ink:#eef1f8;--muted:#98a5c4;--line:#27304d;--red:#ff5a52;--yellow:#ffd426;--green:#4cc36d;--blue:#5b94f0;--shadow:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Archivo,system-ui,-apple-system,"Segoe UI",sans-serif}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
 .appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
-.appbar h1{font:italic 900 30px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;margin:0;display:flex;color:var(--ink)}
-.appbar h1 span:last-child{color:var(--red)}
- 
+.appbar h1{font:italic 900 30px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;margin:0;display:flex}
+.appbar h1 span:nth-child(1){color:var(--red)}.appbar h1 span:nth-child(2){color:var(--yellow)}.appbar h1 span:nth-child(3){color:var(--green)}.appbar h1 span:nth-child(4){color:var(--blue)}
+
 .appbar p{margin:0;font-size:12px;color:var(--muted);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 main{max-width:640px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
 h2{font-size:20px;margin:6px 2px 12px}
@@ -30,14 +30,14 @@ label{display:block;font-size:14px;color:var(--muted);margin:14px 0 6px}
 input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 14px;min-width:0}
 input{flex:1;width:100%}
 .row input{width:auto}
-button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--grad);color:#fff}
+button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff}
 button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
 button.sm{padding:3px 10px;font-size:13px;border-radius:9px}
 button:disabled{opacity:.4;cursor:not-allowed}
-:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;background:transparent;color:var(--muted);padding:8px}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(29,53,87,.18)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(18,24,43,.15)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .chip{display:flex;align-items:center;gap:8px;background:var(--bg);color:var(--ink);border:2px solid transparent;border-radius:999px;padding:5px 14px 5px 5px}
 .chip.on{border-color:var(--blue);background:var(--surface)}
@@ -47,15 +47,15 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .team .hd{display:flex;align-items:center;gap:8px}
 .team .hd b{flex:1}
 .team .chips{margin-bottom:0}
-.place{min-width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;background:var(--grad);color:#fff;font-weight:600}
-.place.p1{background:var(--yellow);color:#1d3557}
+.place{min-width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;background:var(--blue);color:#fff;font-weight:600}
+.place.p1{background:var(--yellow);color:#12182b}
 .hint{color:var(--muted);font-size:14px;margin:0 0 12px}
 .av{width:42px;height:42px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;color:#fff;flex:none}
-.c0{background:#e63946}.c1{background:#457b9d}.c2{background:linear-gradient(135deg,#1d3557,#457b9d)}.c3{background:#a8dadc;color:#1d3557}
+.c0{background:var(--red)}.c1{background:var(--blue)}.c2{background:var(--green)}.c3{background:var(--yellow);color:#12182b}
 .lrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .lrow:last-child{border-bottom:0}
 .rk{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted);flex:none}
-.rk.r1{background:var(--yellow);color:#1d3557}
+.rk.r1{background:var(--yellow);color:#12182b}
 .who{flex:1;min-width:0}
 .who b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .who small{color:var(--muted);font-size:13px}
@@ -70,9 +70,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .empty{color:var(--muted);text-align:center;padding:22px 0;margin:0}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:0 max(0px,calc((100% - 640px)/2)) env(safe-area-inset-bottom,0px)}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;color:var(--muted);border-radius:0;padding:10px 0 8px;font-size:11px}
-.tabbar button{position:relative}
-.tabbar button[aria-current="page"]{color:var(--ink)}
-.tabbar button[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--red)}
+.tabbar button[aria-current="page"]{color:var(--blue)}
 </style>
 </head>
 <body>
@@ -85,7 +83,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <h2>Leaderboard</h2>
   <div class="list" id="board"></div>
 </section>
- 
+
 <section id="tab-play" hidden>
   <h2>Record a game</h2>
   <div class="card">
@@ -106,14 +104,14 @@ button:disabled{opacity:.4;cursor:not-allowed}
     </div>
   </div>
 </section>
- 
+
 <section id="tab-history" hidden>
   <h2>Game history</h2>
   <div class="row" style="margin-bottom:10px;align-items:center"><label for="hfilter" style="margin:0">Show games for</label><select id="hfilter"></select></div>
   <p class="hint" id="hsum"></p>
   <div id="history"></div>
 </section>
- 
+
 <section id="tab-more" hidden>
   <h2>Players</h2>
   <div class="list" id="plist"></div>
@@ -154,7 +152,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function name(id){var p=state.players.find(function(x){return x.id===id});return p?p.name:"Removed player";}
 function names(ids){return ids.map(function(id){return esc(name(id));}).join(" + ");}
 function without(arr,id){return arr.filter(function(x){return x!==id;});}
- 
+
 // One Elo per player, shared by solo and team games. A team's rating is the average of its members; every pair
 // of teams is a head-to-head scaled by K/(teams-1), and each member gets the full change.
 // Solo games are the same thing with teams of one.
@@ -175,7 +173,7 @@ function compute(){
   });
   return{R:R,S:S,deltas:deltas};
 }
- 
+
 function render(){
   var c=compute();
   Array.prototype.forEach.call(document.querySelectorAll("#mode button"),function(b){b.setAttribute("aria-pressed",b.dataset.mode===mode);});
@@ -204,7 +202,7 @@ function render(){
     ready=draft.filter(function(t){return t.length;}).length>=2;
   }
   document.getElementById("record").disabled=!ready;
- 
+
   var R=c.R[bmode],S=c.S[bmode],rows=state.players.slice().sort(function(a,b){return R[b.id]-R[a.id];});
   document.getElementById("board").innerHTML=rows.length?rows.map(function(p,i){
     var s=S[p.id],pct=s.g?Math.round(100*s.w/s.g)+"%":"–";
@@ -213,7 +211,7 @@ function render(){
   document.getElementById("plist").innerHTML=state.players.length?state.players.map(function(p){
     return '<div class="lrow">'+av(p.name)+'<div class="who"><b>'+esc(p.name)+'</b></div><button class="ghost sm" data-rm="'+p.id+'" aria-label="Remove '+esc(p.name)+'">'+(armed==="rm:"+p.id?"Tap to confirm":"Remove")+'</button></div>';
   }).join(""):'<p class="empty">No players yet.</p>';
- 
+
   var hsel=document.getElementById("hfilter"),hkey=state.players.map(function(p){return p.id+p.name;}).join("|");
   if(hf&&!state.players.some(function(p){return p.id===hf;}))hf="";
   if(hsel.dataset.k!==hkey){hsel.dataset.k=hkey;hsel.innerHTML='<option value="">All players</option>'+state.players.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join("");}
@@ -229,7 +227,7 @@ function render(){
     return '<div class="game"><div class="top"><span class="tag">'+(o.g.mode==="solo"?"Solo":"Teams")+'</span><span class="when">'+new Date(o.g.t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})+'</span><button class="ghost sm" data-del="'+o.g.id+'">'+(armed==="del:"+o.g.id?"Tap to confirm":"Delete")+'</button></div>'+lines+'</div>';
   }).join(""):'<p class="empty">'+(state.games.length?"No games for this player yet.":"No games yet. Record one above.")+'</p>';
 }
- 
+
 // ---- Shared storage: a small backend (worker.js) keeps one copy of the scores ----
 var DEFAULTS={url:""};
 var cfg={url:DEFAULTS.url,pin:""};
@@ -301,7 +299,7 @@ document.getElementById("sy-save").onclick=function(){
   connect();
 };
 document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
- 
+
 function addPlayer(){
   var el=document.getElementById("name"),n=el.value.trim();
   if(!n)return;
@@ -353,4 +351,3 @@ connect();
 </script>
 </body>
 </html>
- 
