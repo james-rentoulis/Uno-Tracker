@@ -56,6 +56,7 @@ tr:last-child td{border-bottom:0}
 .empty{color:var(--muted);text-align:center;padding:18px 0;margin:0}
 details.card summary{cursor:pointer;font-weight:600}
 details label{display:block;font-size:14px;color:var(--muted);margin:12px 0 4px}
+.rt{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -137,7 +138,7 @@ function compute(){
       d[i]+=ch;d[j]-=ch;
     }
     var out=g.teams.map(function(){return null;});
-    ent.forEach(function(x,i){out[x.o]=d[i];x.t.forEach(function(id){r[id]+=d[i];st[id].g++;if(i===0)st[id].w++;});});
+    ent.forEach(function(x,i){out[x.o]={d:d[i],p:x.t.map(function(id){var b=r[id];r[id]+=d[i];st[id].g++;if(i===0)st[id].w++;return{id:id,b:b,a:r[id]};})};});
     deltas.push(out);
   });
   return{R:R,S:S,deltas:deltas};
@@ -180,15 +181,15 @@ function render(){
 
   document.getElementById("history").innerHTML=state.games.length?state.games.map(function(g,gi){return{g:g,d:c.deltas[gi]};}).reverse().map(function(o){
     var lines=o.g.teams.map(function(t,i){
-      var v=o.d[i],tag=v===null?"":' <span class="'+(v>=0?'up':'down')+'">'+(v>=0?'+':'−')+Math.abs(Math.round(v))+'</span>';
-      return '<div class="t">'+(o.g.mode==="solo"?(i===0?"Won: ":"Lost: "):(i+1)+". ")+names(t)+tag+'</div>';
+      var e=o.d[i],tag="",who=names(t);if(e){var v=e.d;tag=' <span class="'+(v>=0?'up':'down')+'">'+(v>=0?'+':'−')+Math.abs(Math.round(v))+'</span>';who=e.p.map(function(q){return esc(name(q.id))+' <span class="rt">'+Math.round(q.b)+' → '+Math.round(q.a)+'</span>';}).join(" + ");}
+      return '<div class="t">'+(o.g.mode==="solo"?(i===0?"Won: ":"Lost: "):(i+1)+". ")+who+tag+'</div>';
     }).join("");
     return '<div class="game"><div class="top"><span><span class="tag">'+(o.g.mode==="solo"?"Solo":"Teams")+'</span>'+new Date(o.g.t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})+'</span><button class="ghost sm" data-del="'+o.g.id+'">'+(armed==="del:"+o.g.id?"Tap to confirm":"Delete")+'</button></div>'+lines+'</div>';
   }).join(""):'<p class="empty">No games yet. Record one above.</p>';
 }
 
 // ---- Shared storage: a small backend (worker.js) keeps one copy of the scores ----
-var DEFAULTS={url:"https://uno-backend.james-rentoulis1.workers.dev/"};
+var DEFAULTS={url:""};
 var cfg={url:DEFAULTS.url,pin:""};
 try{var cs=JSON.parse(localStorage.getItem("uno-sync-cfg")||"null");if(cs)Object.keys(cs).forEach(function(k){if(cs[k])cfg[k]=cs[k];});}catch(e){}
 var pending=[],flushing=false,timer=null;
